@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
+from django.utils import http
 from mock import patch
 from testfixtures import LogCapture
 
@@ -54,14 +55,24 @@ class TestLoginHelper(TestCase):
     @ddt.unpack
     def test_unsafe_next(self, unsafe_url, http_accept, user_agent, expected_log):
         """ Test unsafe next parameter """
-        with LogCapture(LOGGER_NAME, level=logging.WARNING) as logger:
-            req = self.request.get(reverse("login") + "?next={url}".format(url=unsafe_url))
-            req.META["HTTP_ACCEPT"] = http_accept  # pylint: disable=no-member
-            req.META["HTTP_USER_AGENT"] = user_agent  # pylint: disable=no-member
-            get_next_url_for_login_page(req)
-            logger.check(
-                (LOGGER_NAME, "WARNING", expected_log)
-            )
+        if http_accept != 'text/html' and http.is_safe_url(unsafe_url):
+            with LogCapture(LOGGER_NAME, level=logging.INFO) as logger:
+                req = self.request.get(reverse("login") + "?next={url}".format(url=unsafe_url))
+                req.META["HTTP_ACCEPT"] = http_accept  # pylint: disable=no-member
+                req.META["HTTP_USER_AGENT"] = user_agent  # pylint: disable=no-member
+                get_next_url_for_login_page(req)
+                logger.check(
+                    (LOGGER_NAME, "INFO", expected_log)
+                )
+        else:
+            with LogCapture(LOGGER_NAME, level=logging.WARNING) as logger:
+                req = self.request.get(reverse("login") + "?next={url}".format(url=unsafe_url))
+                req.META["HTTP_ACCEPT"] = http_accept  # pylint: disable=no-member
+                req.META["HTTP_USER_AGENT"] = user_agent  # pylint: disable=no-member
+                get_next_url_for_login_page(req)
+                logger.check(
+                    (LOGGER_NAME, "WARNING", expected_log)
+                )
 
     @ddt.data(
         ('/dashboard', 'testserver', '/dashboard'),
