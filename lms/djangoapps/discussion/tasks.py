@@ -19,6 +19,7 @@ from edx_ace.recipient import Recipient
 from opaque_keys.edx.keys import CourseKey
 from lms.djangoapps.django_comment_client.utils import permalink
 import lms.lib.comment_client as cc
+import requests
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.ace_common.template_context import get_base_template_context
@@ -57,7 +58,11 @@ def send_ace_message(context):
 
 @task(base=LoggedTask, routing_key=ROUTING_KEY)
 def post_ace_message(context):
-    pass
+    response = requests.post(
+        'http://g1v10stepdo11:2278/getmessage/', #todo:hardcode
+        json=context
+        )
+    print(response.json())
 
 
 def _track_notification_sent(message, context):
