@@ -38,19 +38,9 @@ def send_discussion_email_notification(sender, user, post, **kwargs):
     send_message(post, current_site)
 
 
-@receiver(signals.thread_created)
-def send_discussion_notification(sender, user, post, **kwargs):
-    current_site = get_current_site()
-    if current_site is None:
-        log.info('Discussion: No current site, not sending notification about post: %s.', post.id)
-        return
-
-    post_message(post, current_site)
-
-
-def _build_context(comment, site):
+def send_message(comment, site):
     thread = comment.thread
-    return {
+    context = {
         'course_id': unicode(thread.course_id),
         'comment_id': comment.id,
         'comment_body': comment.body,
@@ -63,13 +53,20 @@ def _build_context(comment, site):
         'thread_commentable_id': thread.commentable_id,
         'site_id': site.id
     }
-
-
-def send_message(comment, site):
-    context = _build_context(comment, site)
     tasks.send_ace_message.apply_async(args=[context])
 
 
+@receiver(signals.thread_created)
+def send_discussion_notification(sender, user, post, **kwargs):
+    current_site = get_current_site()
+    if current_site is None:
+        log.info('Discussion: No current site, not sending notification about post: %s.', post.id)
+        return
+
+    post_message(post, current_site)
+
+
 def post_message(comment, site):
-    context = _build_context(comment, site)
+    #todo: consider restructuring the object before passing to the post function
+    context = comment
     tasks.post_ace_message.apply_async(args=[context])
