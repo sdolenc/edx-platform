@@ -45,7 +45,7 @@ def send_discussion_notification(sender, user, post, **kwargs):
         log.info('Discussion: No current site, not sending notification about post: %s.', post.id)
         return
 
-    send_message(post, current_site)
+    post_message(post, current_site)
 
 
 def _build_context(comment, site):
