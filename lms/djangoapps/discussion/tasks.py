@@ -58,7 +58,7 @@ def send_ace_message(context):
 
 @task(base=LoggedTask, routing_key=ROUTING_KEY)
 def post_ace_message(context):
-    response = requests.post(
+    response = requests.post( #todo: basic exception handling
         'http://g1v10stepdo11:2278/getmessage/', #todo:hardcode
         json=context
         )
