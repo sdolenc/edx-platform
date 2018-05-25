@@ -55,6 +55,11 @@ def send_ace_message(context):
             _track_notification_sent(message, context)
 
 
+@task(base=LoggedTask, routing_key=ROUTING_KEY)
+def post_ace_message(context):
+    pass
+
+
 def _track_notification_sent(message, context):
     """
     Send analytics event for a sent email
