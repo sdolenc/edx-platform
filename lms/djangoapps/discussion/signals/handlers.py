@@ -42,15 +42,17 @@ def send_message(comment, site):
     thread = comment.thread
     context = {
         'course_id': unicode(thread.course_id),
-        'comment_id': comment.id,
         'comment_body': comment.body,
-        'comment_author_id': comment.user_id,
-        'comment_created_at': comment.created_at,  # comment_client models dates are already serialized
         'thread_id': thread.id,
         'thread_title': thread.title,
         'thread_author_id': thread.user_id,
         'thread_created_at': thread.created_at,  # comment_client models dates are already serialized
         'thread_commentable_id': thread.commentable_id,
+
+        # values unique to comments (replies). This can change as needed.
+        'comment_id': comment.id,
+        'comment_author_id': comment.user_id,
+        'comment_created_at': comment.created_at,  # comment_client models dates are already serialized
         'site_id': site.id
     }
     tasks.send_ace_message.apply_async(args=[context])
@@ -66,7 +68,18 @@ def send_discussion_notification(sender, user, post, **kwargs):
     post_message(post, current_site)
 
 
-def post_message(comment, site):
+def post_message(thread, site):
     #todo: consider restructuring the object before passing to the post function
-    context = comment
+    context = {
+        'course_id': unicode(thread.course_id),
+        'comment_body': thread.body,
+        'thread_id': thread.id,
+        'thread_title': thread.title,
+        'thread_author_id': thread.user_id,
+        'thread_created_at': thread.created_at,  # comment_client models dates are already serialized
+        'thread_commentable_id': thread.commentable_id,
+
+        # values unique to threads (new posts). This can change as needed.
+        'thread_type': thread.thread_type
+    }
     tasks.post_ace_message.apply_async(args=[context])
