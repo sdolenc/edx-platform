@@ -115,6 +115,9 @@ def get_threads(request, course, user_info, discussion_id=None, per_page=THREADS
         if get_team(discussion_id) is not None:
             default_query_params['context'] = ThreadContext.STANDALONE
 
+    #note: user_info is only used for caching user sort preference
+    # we may want to move this elsewhere if we want this function
+    # to become user-independent, etc.
     if not request.GET.get('sort_key'):
         # If the user did not select a sort key, use their last used sort key
         default_query_params['sort_key'] = user_info.get('default_sort_key') or default_query_params['sort_key']
@@ -223,14 +226,17 @@ def inline_discussion(request, course_key, discussion_id):
     })
 
 
-@login_required
 @use_bulk_ops
 def forum_form_discussion(request, course_key):
     """
     Renders the main Discussion page, potentially filtered by a search query
     """
     course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=True)
-    if request.is_ajax():
+    if request.is_ajax() or request.GET.get('ajax'):
+        # todo: temp
+        if request.user.username == '' or not request.user.id:
+            request.user.username = 'staff'
+            request.user.id = 7
         user = cc.User.from_django_user(request.user)
         user_info = user.to_dict()
 
