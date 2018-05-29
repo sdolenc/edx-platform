@@ -231,12 +231,13 @@ def forum_form_discussion(request, course_key):
     """
     Renders the main Discussion page, potentially filtered by a search query
     """
+    # todo: temp
+    if request.user.username == '' or not request.user.id:
+        request.user.username = 'staff'
+        request.user.id = 7
+
     course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=True)
     if request.is_ajax() or request.GET.get('ajax'):
-        # todo: temp
-        if request.user.username == '' or not request.user.id:
-            request.user.username = 'staff'
-            request.user.id = 7
         user = cc.User.from_django_user(request.user)
         user_info = user.to_dict()
 
