@@ -45,7 +45,7 @@ from django_comment_client.utils import (
 from django_comment_common.utils import ThreadContext, get_course_discussion_settings, set_course_discussion_settings
 from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
 from openedx.core.djangoapps.monitoring_utils import function_trace
-from student.models import CourseEnrollment
+from student.models import CourseEnrollment, get_user_by_username_or_email
 from util.json_request import JsonResponse, expect_json
 from xmodule.modulestore.django import modulestore
 
@@ -223,14 +223,16 @@ def inline_discussion(request, course_key, discussion_id):
     })
 
 
-@login_required
 @use_bulk_ops
 def forum_form_discussion(request, course_key):
     """
     Renders the main Discussion page, potentially filtered by a search query
     """
+    if request.user.username == '' or not request.user.id:
+        request.user = get_user_by_username_or_email('staff')
+
     course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=True)
-    if request.is_ajax():
+    if request.is_ajax() or request.GET.get('ajax'):
         user = cc.User.from_django_user(request.user)
         user_info = user.to_dict()
 

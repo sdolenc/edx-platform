@@ -31,7 +31,8 @@ from django_comment_client.utils import (
     get_group_id_for_comments_service,
     get_user_group_ids,
     is_comment_too_deep,
-    prepare_content
+    prepare_content,
+    create_comment_impl
 )
 from django_comment_common.signals import (
     comment_created,
@@ -353,42 +354,10 @@ def _create_comment(request, course_key, thread_id=None, parent_id=None):
     given a course_key, thread_id, and parent_id, create a comment,
     called from create_comment to do the actual creation
     """
-    assert isinstance(course_key, CourseKey)
     post = request.POST
     user = request.user
 
-    if 'body' not in post or not post['body'].strip():
-        return JsonError(_("Body can't be empty"))
-
-    course = get_course_with_access(user, 'load', course_key)
-    if course.allow_anonymous:
-        anonymous = post.get('anonymous', 'false').lower() == 'true'
-    else:
-        anonymous = False
-
-    if course.allow_anonymous_to_peers:
-        anonymous_to_peers = post.get('anonymous_to_peers', 'false').lower() == 'true'
-    else:
-        anonymous_to_peers = False
-
-    comment = cc.Comment(
-        anonymous=anonymous,
-        anonymous_to_peers=anonymous_to_peers,
-        user_id=user.id,
-        course_id=text_type(course_key),
-        thread_id=thread_id,
-        parent_id=parent_id,
-        body=post["body"]
-    )
-    comment.save()
-
-    comment_created.send(sender=None, user=user, post=comment)
-
-    followed = post.get('auto_subscribe', 'false').lower() == 'true'
-
-    if followed:
-        cc_user = cc.User.from_django_user(request.user)
-        cc_user.follow(comment.thread)
+    course, comment, followed = create_comment_impl(post, user, course_key, thread_id, parent_id)
 
     track_comment_created_event(request, course, comment, comment.thread.commentable_id, followed)
 

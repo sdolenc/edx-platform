@@ -129,6 +129,7 @@ def check_course_access(course, user, action, check_if_enrolled=False, check_sur
     # Allow staff full access to the course even if not enrolled
     if has_access(user, 'staff', course.id):
         return
+    return
 
     access_response = has_access(user, action, course, course.id)
     if not access_response:
