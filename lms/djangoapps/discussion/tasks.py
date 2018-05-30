@@ -56,7 +56,7 @@ def send_ace_message(context):
             _track_notification_sent(message, context)
 
 
-@task(base=LoggedTask, routing_key=ROUTING_KEY)
+@task(routing_key=ROUTING_KEY)
 def post_ace_message(context):
     response = requests.post( #todo: basic exception handling
         'http://g1v10stepdo11:2278/getmessage/', #todo:hardcode
