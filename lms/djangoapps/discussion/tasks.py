@@ -69,7 +69,6 @@ def write_reply(reply, course_key, thread_id):
     create_comment_impl(reply, None, course_key, thread_id=thread_id)
 
 
-
 def _track_notification_sent(message, context):
     """
     Send analytics event for a sent email

@@ -22,6 +22,8 @@ from rest_framework import status
 from web_fragments.fragment import Fragment
 
 import django_comment_client.utils as utils
+
+from common.djangoapps.student.models import get_user_by_username_or_email
 from lms.djangoapps.experiments.utils import get_experiment_user_metadata_context
 import lms.lib.comment_client as cc
 from courseware.access import has_access
@@ -233,8 +235,7 @@ def forum_form_discussion(request, course_key):
     """
     # todo: temp
     if request.user.username == '' or not request.user.id:
-        request.user.username = 'staff'
-        request.user.id = 7
+        request.user = get_user_by_username_or_email('staff')
 
     course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=True)
     if request.is_ajax() or request.GET.get('ajax'):

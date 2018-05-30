@@ -59,17 +59,7 @@ def send_message(comment, site):
 
 
 @receiver(signals.thread_created)
-def send_discussion_notification(sender, user, post, **kwargs):
-    current_site = get_current_site()
-    if current_site is None:
-        log.info('Discussion: No current site, not sending notification about post: %s.', post.id)
-        return
-
-    post_message(post, current_site)
-
-
-def post_message(thread, site):
-    #todo: consider restructuring the object before passing to the post function
+def send_discussion_notification(sender, user, thread, **kwargs):
     context = {
         'course_id': unicode(thread.course_id),
         'comment_body': thread.body,
@@ -84,8 +74,8 @@ def post_message(thread, site):
     }
     #todo: use response
     response = tasks.post_ace_message.apply_async(args=[context])
-
     reply = {'body': 'this is a reply'}
+
     course_key = CourseKey.from_string(thread.course_id)
     thread_id = thread.id
     tasks.write_reply.apply_async(args=[reply, course_key, thread_id])
