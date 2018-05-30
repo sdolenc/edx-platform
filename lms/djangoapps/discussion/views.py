@@ -22,7 +22,6 @@ from rest_framework import status
 from web_fragments.fragment import Fragment
 
 import django_comment_client.utils as utils
-
 from lms.djangoapps.experiments.utils import get_experiment_user_metadata_context
 import lms.lib.comment_client as cc
 from courseware.access import has_access
@@ -116,9 +115,6 @@ def get_threads(request, course, user_info, discussion_id=None, per_page=THREADS
         if get_team(discussion_id) is not None:
             default_query_params['context'] = ThreadContext.STANDALONE
 
-    #note: user_info is only used for caching user sort preference
-    # we may want to move this elsewhere if we want this function
-    # to become user-independent, etc.
     if not request.GET.get('sort_key'):
         # If the user did not select a sort key, use their last used sort key
         default_query_params['sort_key'] = user_info.get('default_sort_key') or default_query_params['sort_key']
@@ -232,7 +228,6 @@ def forum_form_discussion(request, course_key):
     """
     Renders the main Discussion page, potentially filtered by a search query
     """
-    # todo: temp
     if request.user.username == '' or not request.user.id:
         request.user = get_user_by_username_or_email('staff')
 
