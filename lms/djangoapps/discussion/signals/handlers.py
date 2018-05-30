@@ -82,4 +82,10 @@ def post_message(thread, site):
         # values unique to threads (new posts). This can change as needed.
         'thread_type': thread.thread_type
     }
-    tasks.post_ace_message.apply_async(args=[context])
+    #todo: use response
+    response = tasks.post_ace_message.apply_async(args=[context])
+
+    reply = {'body': 'this is a reply'}
+    course_key = CourseKey.from_string(thread.course_id)
+    thread_id = thread.id
+    tasks.write_reply.apply_async(args=[reply, course_key, thread_id])

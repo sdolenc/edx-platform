@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import connection
 from django.http import HttpResponse
+from django.utils.translation import ugettext as _
 from pytz import UTC
 from opaque_keys.edx.keys import CourseKey
 from opaque_keys.edx.locations import i4xEncoder
@@ -28,6 +29,10 @@ from student.roles import GlobalStaff
 from xmodule.modulestore.django import modulestore
 from xmodule.partitions.partitions import ENROLLMENT_TRACK_PARTITION_ID
 from xmodule.partitions.partitions_service import PartitionService
+
+from courseware.courses import get_course_with_access
+from django_comment_common.signals import comment_created
+import lms.lib.comment_client as cc
 
 log = logging.getLogger(__name__)
 
@@ -1031,3 +1036,45 @@ def is_content_authored_by(content, user):
         return int(content.get('user_id')) == user.id
     except (ValueError, TypeError):
         return False
+
+
+def create_comment_impl(post, user, course_key, thread_id=None, parent_id=None):
+    assert isinstance(course_key, CourseKey)
+
+    if not user:
+        user = get_user_by_username_or_email('honor')
+
+    if 'body' not in post or not post['body'].strip():
+        return JsonError(_("Body can't be empty"))
+
+    course = get_course_with_access(user, 'load', course_key)
+    if course.allow_anonymous:
+        anonymous = post.get('anonymous', 'false').lower() == 'true'
+    else:
+        anonymous = False
+
+    if course.allow_anonymous_to_peers:
+        anonymous_to_peers = post.get('anonymous_to_peers', 'false').lower() == 'true'
+    else:
+        anonymous_to_peers = False
+
+    comment = cc.Comment(
+        anonymous=anonymous,
+        anonymous_to_peers=anonymous_to_peers,
+        user_id=user.id,
+        course_id=text_type(course_key),
+        thread_id=thread_id,
+        parent_id=parent_id,
+        body=post["body"]
+    )
+    comment.save()
+
+    comment_created.send(sender=None, user=user, post=comment)
+
+    followed = post.get('auto_subscribe', 'false').lower() == 'true'
+
+    if followed:
+        cc_user = cc.User.from_django_user(user)
+        cc_user.follow(comment.thread)
+
+    return course, comment, followed

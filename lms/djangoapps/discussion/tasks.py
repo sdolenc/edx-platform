@@ -17,7 +17,7 @@ from edx_ace.utils import date
 from edx_ace.message import MessageType
 from edx_ace.recipient import Recipient
 from opaque_keys.edx.keys import CourseKey
-from lms.djangoapps.django_comment_client.utils import permalink
+from lms.djangoapps.django_comment_client.utils import permalink, create_comment_impl
 import lms.lib.comment_client as cc
 import requests
 
@@ -58,11 +58,16 @@ def send_ace_message(context):
 
 @task(routing_key=ROUTING_KEY)
 def post_ace_message(context):
-    response = requests.post( #todo: basic exception handling
+    return requests.post( #todo: basic exception handling
         'http://g1v10stepdo11:2278/getmessage/', #todo:hardcode
         json=context
         )
-    print(response.json())
+
+
+@task(routing_key=ROUTING_KEY)
+def write_reply(reply, course_key, thread_id):
+    create_comment_impl(reply, None, course_key, thread_id=thread_id)
+
 
 
 def _track_notification_sent(message, context):
