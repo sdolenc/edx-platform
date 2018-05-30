@@ -353,9 +353,13 @@ def _create_comment(request, course_key, thread_id=None, parent_id=None):
     given a course_key, thread_id, and parent_id, create a comment,
     called from create_comment to do the actual creation
     """
-    assert isinstance(course_key, CourseKey)
     post = request.POST
     user = request.user
+    return create_comment_impl(post, user, course_key, thread_id, parent_id)
+
+
+def create_comment_impl(post, user, course_key, thread_id=None, parent_id=None):
+    assert isinstance(course_key, CourseKey)
 
     if 'body' not in post or not post['body'].strip():
         return JsonError(_("Body can't be empty"))
@@ -387,7 +391,7 @@ def _create_comment(request, course_key, thread_id=None, parent_id=None):
     followed = post.get('auto_subscribe', 'false').lower() == 'true'
 
     if followed:
-        cc_user = cc.User.from_django_user(request.user)
+        cc_user = cc.User.from_django_user(user)
         cc_user.follow(comment.thread)
 
     track_comment_created_event(request, course, comment, comment.thread.commentable_id, followed)
