@@ -23,7 +23,6 @@ from web_fragments.fragment import Fragment
 
 import django_comment_client.utils as utils
 
-from common.djangoapps.student.models import get_user_by_username_or_email
 from lms.djangoapps.experiments.utils import get_experiment_user_metadata_context
 import lms.lib.comment_client as cc
 from courseware.access import has_access
@@ -47,7 +46,7 @@ from django_comment_client.utils import (
 from django_comment_common.utils import ThreadContext, get_course_discussion_settings, set_course_discussion_settings
 from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
 from openedx.core.djangoapps.monitoring_utils import function_trace
-from student.models import CourseEnrollment
+from student.models import CourseEnrollment, get_user_by_username_or_email
 from util.json_request import JsonResponse, expect_json
 from xmodule.modulestore.django import modulestore
 

@@ -45,12 +45,14 @@ def send_message(comment, site):
         'comment_body': comment.body,
         'thread_id': thread.id,
         'thread_title': thread.title,
+        'thread_author_name': thread.username,
         'thread_author_id': thread.user_id,
         'thread_created_at': thread.created_at,  # comment_client models dates are already serialized
         'thread_commentable_id': thread.commentable_id,
 
         # values unique to comments (replies). This can change as needed.
         'comment_id': comment.id,
+        'comment_author_name': comment.username,
         'comment_author_id': comment.user_id,
         'comment_created_at': comment.created_at,  # comment_client models dates are already serialized
         'site_id': site.id
@@ -59,12 +61,14 @@ def send_message(comment, site):
 
 
 @receiver(signals.thread_created)
-def send_discussion_notification(sender, user, thread, **kwargs):
+def send_discussion_notification(sender, user, post, **kwargs):
+    thread = post
     context = {
         'course_id': unicode(thread.course_id),
         'comment_body': thread.body,
         'thread_id': thread.id,
         'thread_title': thread.title,
+        'thread_author_name': thread.username,
         'thread_author_id': thread.user_id,
         'thread_created_at': thread.created_at,  # comment_client models dates are already serialized
         'thread_commentable_id': thread.commentable_id,
