@@ -101,8 +101,9 @@ def send_discussion_notification(sender, user, post, **kwargs):
     }
     #todo: use response
     response = tasks.post_ace_message.apply_async(args=[context])
-    reply = {'body': 'this is a reply ' + response.result.content}
+    if response.result.status_code == 200 and response.result.content:
+        reply = {'body': 'this is a reply ' + response.result.content}
 
-    course_key = CourseKey.from_string(thread.course_id)
-    thread_id = thread.id
-    tasks.write_reply.apply_async(args=[reply, course_key, thread_id])
+        course_key = CourseKey.from_string(thread.course_id)
+        thread_id = thread.id
+        tasks.write_reply.apply_async(args=[reply, course_key, thread_id])
