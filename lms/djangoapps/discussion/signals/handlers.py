@@ -59,10 +59,28 @@ def send_message(comment, site):
     }
     tasks.send_ace_message.apply_async(args=[context])
 
+def get_course_urls(course_id):
+    if "Demo" in course_id or "demo" in course_id:
+        return (
+            "http://x1v16stepdo18:8000/courses/course-v1:edX+DemoX+Demo_Course/course/",
+            "http://x1v16stepdo18:8000/courses/course-v1:edX+DemoX+Demo_Course/search/?query=",
+            "http://x1v16stepdo18:8000/courses/course-v1%3AedX%2BDemoX%2BDemo_Course/discussion/forum/?ajax=1&page=1&sort_key=activity&sort_order=desc",
+            "",
+            ""
+        )
+    else:
+        return (
+            "http://x1v16stepdo18:8000/courses/course-v1:Microsoft+Dat206+May30_2/course/",
+            "http://x1v16stepdo18:8000/courses/course-v1:Microsoft+Dat206+May30_2/search/?query=",
+            "http://x1v16stepdo18:8000/courses/course-v1%3AMicrosoft%2BDat206%2BMay30_2/discussion/forum/?ajax=1&page=1&sort_key=activity&sort_order=desc",
+            "http://x1v16stepdo18:8000/courses/course-v1:Microsoft+Dat206+May30_2/42e780a3df3d4aaf8dda4198192254e2/",
+            "http://x1v16stepdo18:8000/courses/course-v1:Microsoft+Dat206+May30_2/ce42d37f282141469a3c0bd38b6766d7/"
+        )
 
 @receiver(signals.thread_created)
 def send_discussion_notification(sender, user, post, **kwargs):
     thread = post
+    home, search_content, forum_threads, syllabus, faq = get_course_urls(thread.course_id)
     context = {
         'course_id': unicode(thread.course_id),
         'comment_body': thread.body,
@@ -74,7 +92,12 @@ def send_discussion_notification(sender, user, post, **kwargs):
         'thread_commentable_id': thread.commentable_id,
 
         # values unique to threads (new posts). This can change as needed.
-        'thread_type': thread.thread_type
+        'thread_type': thread.thread_type,
+        'home_url': home,
+        'search_content_url': search_content,
+        'forum_threads_url': forum_threads,
+        'syllabus_url': syllabus,
+        'faq_url': faq
     }
     #todo: use response
     response = tasks.post_ace_message.apply_async(args=[context])

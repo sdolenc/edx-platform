@@ -59,7 +59,8 @@ def send_ace_message(context):
 @task(routing_key=ROUTING_KEY)
 def post_ace_message(context):
     return requests.post( #todo: basic exception handling
-        'http://g1v10stepdo11:2278/getmessage/', #todo:hardcode
+        #'http://g1v10stepdo11:2278/getmessage/', #todo:hardcode
+        'http://ca3f8c30.ngrok.io/api/vtafunction?code=/RMf9lllex8FHdEmal9M6gsqUrZNnOMqH/byw2sxW6FE3OCjzuaYvw==&clientId=default',
         json=context
         )
 
