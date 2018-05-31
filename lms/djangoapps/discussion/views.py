@@ -163,6 +163,10 @@ def get_threads(request, course, user_info, discussion_id=None, per_page=THREADS
         # patch for backward compatibility to comments service
         if 'pinned' not in thread:
             thread['pinned'] = False
+        if 'course_id' in thread and 'commentable_id' in thread and 'id' in thread:
+            #todo: use uri builder
+            thread['url'] = '{}://{}/courses/{}/discussion/forum/{}/threads/{}'.format(
+                request.scheme, request.META['HTTP_HOST'], thread['course_id'], thread['commentable_id'], thread['id'])
 
     query_params['page'] = paginated_results.page
     query_params['num_pages'] = paginated_results.num_pages
