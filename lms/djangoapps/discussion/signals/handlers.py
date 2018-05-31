@@ -96,13 +96,13 @@ def send_discussion_notification(sender, user, post, **kwargs):
         'home_url': home,
         'search_content_url': search_content,
         'forum_threads_url': forum_threads,
-        'syllabus_url': syllabus,
-        'faq_url': faq
+        'syllabus_url': syllabus if syllabus else home,
+        'faq_url': faq if faq else home
     }
     #todo: use response
     response = tasks.post_ace_message.apply_async(args=[context])
     if response.result.status_code == 200 and response.result.content:
-        reply = {'body': 'this is a reply ' + response.result.content}
+        reply = {'body': response.result.content}
 
         course_key = CourseKey.from_string(thread.course_id)
         thread_id = thread.id
