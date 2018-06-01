@@ -91,7 +91,7 @@ def perform_request(method, url, data_or_params=None, raw=False,
             data=data,
             params=params,
             headers=headers,
-            timeout=config.connection_timeout
+            timeout=50.0
         )
 
     metric_tags.append(u'status_code:{}'.format(response.status_code))
@@ -187,7 +187,7 @@ def check_forum_heartbeat():
     try:
         res = requests.get(
             '%s/heartbeat' % COMMENTS_SERVICE,
-            timeout=config.connection_timeout
+            timeout=50.0
         ).json()
         if res['OK']:
             return 'forum', True, 'OK'
