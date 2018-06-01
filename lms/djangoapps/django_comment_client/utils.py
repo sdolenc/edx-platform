@@ -1042,7 +1042,7 @@ def create_comment_impl(post, user, course_key, thread_id=None, parent_id=None):
     assert isinstance(course_key, CourseKey)
 
     if not user:
-        user = get_user_by_username_or_email('VickiNashBot')
+        user = get_user_by_username_or_email('VickiNash')
 
     if 'body' not in post or not post['body'].strip():
         return JsonError(_("Body can't be empty"))

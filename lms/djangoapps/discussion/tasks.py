@@ -60,7 +60,7 @@ def send_ace_message(context):
 def post_ace_message(context):
     return requests.post( #todo: basic exception handling
         #'http://g1v10stepdo11:2278/getmessage/', #todo:hardcode
-        'http://8e63c45f.ngrok.io/api/vtafunction?code=/RMf9lllex8FHdEmal9M6gsqUrZNnOMqH/byw2sxW6FE3OCjzuaYvw==&clientId=default',
+        'http://75d8811b.ngrok.io/api/vtafunction?code=/RMf9lllex8FHdEmal9M6gsqUrZNnOMqH/byw2sxW6FE3OCjzuaYvw==&clientId=default',
         json=context
         )
 
