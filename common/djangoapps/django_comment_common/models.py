@@ -159,7 +159,7 @@ class ForumsConfig(ConfigurationModel):
     """Config for the connection to the cs_comments_service forums backend."""
 
     connection_timeout = models.FloatField(
-        default=50.0,
+        default=17.0,
         help_text="Seconds to wait when trying to connect to the comment service.",
     )
 
